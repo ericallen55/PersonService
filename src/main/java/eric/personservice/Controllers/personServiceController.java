@@ -1,11 +1,12 @@
 package eric.personservice.Controllers;
 
+import eric.personservice.Models.PersonRequest;
 import eric.personservice.Models.PersonResponse;
 import eric.personservice.Services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class personServiceController {
@@ -13,13 +14,24 @@ public class personServiceController {
     PersonService personService;
 
     @GetMapping("personById/{id}")
-    PersonResponse getAllPeople(@PathVariable("id") Integer id){
+    PersonResponse getPersonById(@PathVariable("id") Integer id){
         return personService.getPersonById(id);
     }
 
+    @GetMapping("people")
+    List<PersonResponse> getPeople(){
+        return personService.getPeople();
+    }
 
-    //get query param
-    //post
+    @GetMapping("queryPeople")
+    List<PersonResponse> queryPeople(@RequestParam("type") String type, @RequestParam("value") String value){
+        return personService.queryPeople(type, value);
+    }
+
+    @PostMapping(path = "addPerson", consumes = "application/json", produces = "application/json")
+    PersonResponse addPerson(@RequestBody PersonRequest person) {
+        return personService.addPerson(person);
+    }
     //put
     //delete
 }
