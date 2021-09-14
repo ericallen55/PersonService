@@ -32,6 +32,10 @@ public class personServiceController {
     PersonResponse addPerson(@RequestBody PersonRequest person) {
         return personService.addPerson(person);
     }
-    //put
+
+    @PutMapping(path = "updatePerson/{id}")
+    PersonResponse updatePerson(@PathVariable("id") Integer id, @RequestBody PersonRequest personRequest){
+        return personService.updatePerson(id, personRequest);
+    }
     //delete
 }

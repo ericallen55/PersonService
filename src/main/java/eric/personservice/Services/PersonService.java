@@ -21,4 +21,7 @@ public class PersonService {
     public PersonResponse addPerson(PersonRequest personRequest){
         return personDao.addPerson(personRequest);
     }
+    public PersonResponse updatePerson(Integer id, PersonRequest personRequest){
+        return personDao.updatePerson(id, personRequest);
+    }
 }
