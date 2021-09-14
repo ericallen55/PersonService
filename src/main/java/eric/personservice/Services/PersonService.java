@@ -18,10 +18,11 @@ public class PersonService {
     }
     public List<PersonResponse> getPeople() { return  personDao.getPeople(); }
     public List<PersonResponse> queryPeople(String type, String value){ return personDao.queryPeople(type, value);}
-    public PersonResponse addPerson(PersonRequest personRequest){
+    public Boolean addPerson(PersonRequest personRequest){
         return personDao.addPerson(personRequest);
     }
-    public PersonResponse updatePerson(Integer id, PersonRequest personRequest){
+    public Boolean deletePerson(Integer id){ return personDao.deletePerson(id); }
+    public Boolean updatePerson(Integer id, PersonRequest personRequest){
         return personDao.updatePerson(id, personRequest);
     }
 }

@@ -13,5 +13,4 @@ public class PersonResponse {
     Integer id;
     String firstName;
     String lastName;
-    Integer age;
 }

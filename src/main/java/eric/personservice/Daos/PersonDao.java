@@ -2,78 +2,45 @@ package eric.personservice.Daos;
 
 import eric.personservice.Models.PersonRequest;
 import eric.personservice.Models.PersonResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Component
 public class PersonDao {
-    private List<PersonResponse> people = new ArrayList<>();
-    Statement statement;
+    @Autowired
+    DBCPDataSource dbcpDataSource;
 
-    public PersonDao(){
-        Connection conn = null;
-
+    public PersonResponse getPersonById(Integer id) {
         try {
-            String connectionUrl = "jdbc:sqlserver://UTLPG10884\\SQLEXPRESS:58310;instance=SQLEXPRESS;database=Person DB;integratedsecurity=true";
-            conn = DriverManager.getConnection(connectionUrl);
-            if (conn != null) {
-
-                statement = conn.createStatement();
-                ResultSet resultSet;
-                resultSet = statement.executeQuery("select * from Distributor");
-
-                while(resultSet.next()){
-                    System.out.println(resultSet.getString("FirstName"));
-                }
+            PreparedStatement preparedStatement = dbcpDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE DisributorId = ?");
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
             }
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                if (conn != null && !conn.isClosed()) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+            return PersonResponse.builder()
+                    .id(resultSet.getInt("DistributorId"))
+                    .firstName(resultSet.getString("FirstName"))
+                    .lastName(resultSet.getString("LastName"))
+                    .build();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
-
-
-        people.add(0, PersonResponse.builder()
-                .id(0)
-                .firstName("Eric")
-                .lastName("Allen")
-                .age(45)
-                .build());
-
-        people.add(0, PersonResponse.builder()
-                .id(1)
-                .firstName("Holly")
-                .lastName("Allen")
-                .age(47)
-                .build());
-
+        return null;
     }
 
-
-
-
-    public PersonResponse getPersonById(Integer id){
-        return people.get(id);
-    }
-    public List<PersonResponse> getPeople(){
-        ResultSet resultSet;
+    public List<PersonResponse> getPeople() {
         List<PersonResponse> peopleResponse = new ArrayList();
         try {
-            resultSet = statement.executeQuery("select * from Distributor");
-            while(resultSet.next()){
+            ResultSet resultSet = dbcpDataSource.getConnection().createStatement().executeQuery("select * from Distributor");
+            while (resultSet.next()) {
                 peopleResponse.add(PersonResponse.builder()
+                        .id(resultSet.getInt("DistributorId"))
                         .firstName(resultSet.getString("FirstName"))
                         .lastName(resultSet.getString("LastName"))
                         .build());
@@ -83,36 +50,87 @@ public class PersonDao {
         }
         return peopleResponse;
     }
-    public List<PersonResponse> queryPeople(String type, String value){
-        switch (type){
-            case "firstName":
-                return people.stream().filter(p -> p.getFirstName().equals(value)).collect(Collectors.toList());
-            case "lastName":
-                return people.stream().filter(p -> p.getLastName().equals(value)).collect(Collectors.toList());
-            case "age":
-                return people.stream().filter(p -> p.getAge().toString().equals(value)).collect(Collectors.toList());
+
+    public List<PersonResponse> queryPeople(String type, String value) {
+        try {
+            PreparedStatement preparedStatement;
+            switch (type) {
+                case "FirstName":
+                    preparedStatement = DBCPDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE FirstName = ?");
+                    break;
+                case "LastName":
+                    preparedStatement = DBCPDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE LastName = ?");
+                    break;
+                default:
+                    return null;
+            }
+            preparedStatement.setString(1, value);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<PersonResponse> people = new ArrayList<>();
+            while (resultSet.next()) {
+                people.add(PersonResponse.builder()
+                        .id(resultSet.getInt("DistributorId"))
+                        .firstName(resultSet.getString("FirstName"))
+                        .lastName(resultSet.getString("LastName"))
+                        .build());
+            }
+            return people;
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
         return null;
+}
+
+    public Boolean addPerson(PersonRequest personRequest) {
+        try {
+            PreparedStatement preparedStatement = DBCPDataSource.getConnection()
+                    .prepareStatement("INSERT INTO Distributor (FirstName,LastName) VALUES (?,?)");
+
+            preparedStatement.setString(1, personRequest.getFirstName());
+            preparedStatement.setString(2, personRequest.getLastName());
+
+            preparedStatement.executeUpdate();
+            return true;
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
     }
 
-    public PersonResponse addPerson(PersonRequest personRequest){
-        people.add(people.size(), PersonResponse.builder()
-                .id(people.size())
-                .firstName(personRequest.getFirstName())
-                .lastName(personRequest.getLastName())
-                .age(personRequest.getAge())
-                .build());
-
-        return people.get(people.size() -1);
+    public Boolean deletePerson(Integer id) {
+        try {
+            PreparedStatement preparedStatement = DBCPDataSource.getConnection()
+                    .prepareStatement("DELETE FROM Distributor WHERE DistributorId = ?");
+            preparedStatement.setInt(1, id);
+            int success = preparedStatement.executeUpdate();
+            if (success > 0)
+                return true;
+            else
+                return false;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
     }
 
-    public PersonResponse updatePerson(Integer id, PersonRequest personRequest){
-        people.set(id, PersonResponse.builder()
-                .id(id)
-                .firstName(personRequest.getFirstName())
-                .lastName(personRequest.getLastName())
-                .age(personRequest.getAge())
-                .build());
-        return people.get(id);
+    public Boolean updatePerson(Integer id, PersonRequest personRequest) {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = DBCPDataSource.getConnection()
+                    .prepareStatement("UPDATE Distributor SET FirstName = ?, LastName = ? WHERE DistributorId=?");
+            preparedStatement.setString(1, personRequest.getFirstName());
+            preparedStatement.setString(2, personRequest.getLastName());
+            preparedStatement.setInt(3, id);
+            int success = preparedStatement.executeUpdate();
+            if (success > 0)
+                return true;
+            else
+                return false;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
     }
 }
