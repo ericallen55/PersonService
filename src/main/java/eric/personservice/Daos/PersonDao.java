@@ -17,7 +17,7 @@ public class PersonDao {
 
     public PersonResponse getPersonById(Integer id) {
         try {
-            PreparedStatement preparedStatement = dbcpDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE DisributorId = ?");
+            PreparedStatement preparedStatement = dbcpDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE DistributorId = ?");
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
