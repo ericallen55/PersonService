@@ -12,8 +12,6 @@ public class DBCPDataSource {
     private static BasicDataSource ds = new BasicDataSource();
 
     static {
-//        String connectionUrl = "jdbc:sqlserver://UTLPG10884\\SQLEXPRESS:58310;instance=SQLEXPRESS;database=Person DB;integratedsecurity=true";
-
         ds.setUrl("jdbc:sqlserver://UTLPG10884\\SQLEXPRESS:58310;instance=SQLEXPRESS;database=Person DB;integratedsecurity=true");
         ds.setMinIdle(5);
         ds.setMaxIdle(10);

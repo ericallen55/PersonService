@@ -12,12 +12,9 @@ import java.util.List;
 
 @Component
 public class PersonDao {
-    @Autowired
-    DBCPDataSource dbcpDataSource;
-
     public PersonResponse getPersonById(Integer id) {
-        try {
-            PreparedStatement preparedStatement = dbcpDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE DistributorId = ?");
+        try{
+           PreparedStatement preparedStatement = DBCPDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE DistributorId = ?");
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
@@ -37,7 +34,7 @@ public class PersonDao {
     public List<PersonResponse> getPeople() {
         List<PersonResponse> peopleResponse = new ArrayList();
         try {
-            ResultSet resultSet = dbcpDataSource.getConnection().createStatement().executeQuery("select * from Distributor");
+            ResultSet resultSet = DBCPDataSource.getConnection().createStatement().executeQuery("select * from Distributor");
             while (resultSet.next()) {
                 peopleResponse.add(PersonResponse.builder()
                         .id(resultSet.getInt("DistributorId"))
@@ -80,7 +77,7 @@ public class PersonDao {
             throwables.printStackTrace();
         }
         return null;
-}
+    }
 
     public Boolean addPerson(PersonRequest personRequest) {
         try {
