@@ -2,10 +2,11 @@ package eric.personservice.Daos;
 
 import eric.personservice.Models.PersonRequest;
 import eric.personservice.Models.PersonResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +14,8 @@ import java.util.List;
 @Component
 public class PersonDao {
     public PersonResponse getPersonById(Integer id) {
-        try{
-           PreparedStatement preparedStatement = DBCPDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE DistributorId = ?");
+        try {
+            PreparedStatement preparedStatement = DBCPDataSource.getConnection().prepareStatement("SELECT * from Distributor WHERE DistributorId = ?");
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
