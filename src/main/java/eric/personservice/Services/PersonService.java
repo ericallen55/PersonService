@@ -17,7 +17,7 @@ public class PersonService {
         return personDao.getPersonById(id);
     }
     public List<PersonResponse> getPeople() { return  personDao.getPeople(); }
-    public List<PersonResponse> queryPeople(String type, String value){ return personDao.queryPeople(type, value);}
+    public List<PersonResponse> queryPeople(String type, String value){ return personDao.queryPeople(type.toLowerCase(), value);}
     public Boolean addPerson(PersonRequest personRequest){
         return personDao.addPerson(personRequest);
     }
